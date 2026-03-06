@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { LangProvider } from "./context/LangContext";
@@ -17,9 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system">
-          <LangProvider>{children}</LangProvider>
-        </ThemeProvider>
+        <Suspense fallback={null}>
+          <ThemeProvider attribute="class" defaultTheme="system">
+            <LangProvider>{children}</LangProvider>
+          </ThemeProvider>
+        </Suspense>
       </body>
     </html>
   );
