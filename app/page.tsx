@@ -1,65 +1,63 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Apartment } from "@/app/types";
+import Welcome from "@/components/Welcome";
+import CitizenshipSelect from "@/components/CitizenshipSelect";
+import ThemeToggle from "@/components/ThemeToggle";
+import GuestNumberSelect from "@/components/GuestsNumberSelect";
+import GuestForm from "@/components/GuestForm";
+import { useLang } from "./context/LangContext";
 
 export default function Home() {
+  const searchParams = useSearchParams();
+  const { lang, setLang } = useLang();
+
+  const initialApartment = searchParams.get("apartment") as Apartment | null;
+  const [apartment, setApartment] = useState<Apartment>(
+    initialApartment ?? Apartment.Delux
+  );
+
+  const initialGuests = parseInt(searchParams.get("guests") || "1", 10);
+  const [selectedGuests, setSelectedGuests] = useState(
+    initialGuests >= 1 && initialGuests <= 4 ? initialGuests : 1
+  );
+
+  const [currentGuestIndex, setCurrentGuestIndex] = useState(1);
+
+  const handleNext = () => {
+    if (currentGuestIndex < selectedGuests) {
+      setCurrentGuestIndex((prev) => prev + 1);
+    } else {
+      // All guests submitted, redirect handled inside GuestForm
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="min-h-screen bg-gray-950/5 dark:bg-gray-900 dark:text-gray-100 transition-colors flex flex-col items-center justify-center gap-8 p-4">
+      <div className="w-full flex flex-col gap-5 max-w-lg rounded-lg bg-white px-6 py-8 shadow-xl dark:bg-gray-800 transition-colors">
+        <ThemeToggle />
+        <Welcome
+          lang={lang}
+          apartment={apartment}
+          setApartment={setApartment}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        <CitizenshipSelect lang={lang} setLang={setLang} />
+        <GuestNumberSelect
+          lang={lang}
+          selectedGuests={selectedGuests}
+          setSelectedGuests={setSelectedGuests}
+        />
+        <GuestForm
+          lang={lang}
+          apartment={apartment}
+          setCurrentGuestIndex={setCurrentGuestIndex}
+          currentGuestIndex={currentGuestIndex}
+          totalGuests={selectedGuests}
+          onNext={handleNext} // This will increment the guest index
+        />
+      </div>
+    </main>
   );
 }
